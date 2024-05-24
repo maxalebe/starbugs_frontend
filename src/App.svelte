@@ -33,7 +33,7 @@
   }
   
   async function showStars() {
-    const response = await axios.get('http://localhost:3000/star-data');
+    const response = await axios.get('https://newstar-api.maximebeck.de/star-data');
     const stars = response.data;
 
     // Clear existing stars from the scene
