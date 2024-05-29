@@ -15,19 +15,22 @@
     ];
     let selectedConstellation = constellations[0];
 
-    async function fetchStars() {
-        const API_URL = `${
-            import.meta.env.VITE_API_BASE_URL
-        }/constellation?constellation=${selectedConstellation}`;
-         console.log(API_URL);
-        try {
-            const response = await axios.get(API_URL);
-            console.log(response.data);
-            resultsStore.set(response.data);
-        } catch (error) {
-            console.error("Fehler beim Abrufen der Sterndaten:", error);
-        }
+async function fetchStars() {
+    // api url is constructed from docker-compose envs:
+    console.log(`fetching stars for ${selectedConstellation}...`);
+    const baseUrl =
+        import.meta.env.VITE_API_BASE_URL || "https://starbugs_api.sweavs.de";
+    console.log("baseUrl:", baseUrl);
+    const API_URL = `${baseUrl}/constellation?constellation=${selectedConstellation}`;
+
+    try {
+        const response = await axios.get(API_URL);
+        resultsStore.set(response.data);
+    } catch (error) {
+        console.error("error fetching star data:", error);
     }
+}
+
 
     onMount(() => {
         fetchStars();
