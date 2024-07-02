@@ -91,7 +91,36 @@
 
       stars.forEach((star) => {
         const geometry = new THREE.SphereGeometry(0.2, 16, 16);
-        const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const material = new THREE.ShaderMaterial({
+          uniforms: {
+            time: { value: Math.random() * 1000 },
+            hover: { value: false }
+          },
+          vertexShader: `
+            varying vec3 vNormal;
+            void main() {
+              vNormal = normalize(normalMatrix * normal);
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `,
+          fragmentShader: `
+            uniform float time;
+            uniform bool hover;
+            varying vec3 vNormal;
+            void main() {
+              float intensity = sin(time + length(vNormal) * 10.0) * 0.5 + 0.5;
+              vec3 color = vec3(intensity);
+              ${star.wikiUrl ? 'color = vec3(0.0, 0.0, 1.0);' : ''}
+              if (hover) {
+                color = vec3(1.0, 1.0, 0.0);
+              } else if (${star.wikiUrl ? 'true' : 'false'}) {
+                color = vec3(0.0, 0.0, 1.0);
+              }
+              gl_FragColor = vec4(color, 1.0);
+            }
+          `,
+          transparent: true
+        });
         const starMesh = new THREE.Mesh(geometry, material);
         starMesh.position.set(star.x0, star.y0, star.z0);
         starMesh.userData = { wikiUrl: star.wikiUrl };
@@ -197,7 +226,7 @@
         const result = await axios.post("https://newstar-api.maximebeck.de/api/wiki-summary", {
           wikiUrl: firstObject.userData.wikiUrl
         })
-        console.log(result.data);
+        console.log(result.data.summary);
         };
 
       }
