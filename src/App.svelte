@@ -4,6 +4,10 @@
   import * as THREE from 'three';
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
+  // OpenAI API Konfiguration
+  const OPENAI_API_KEY = 'sk-proj-8S3kEKIkANXEpzUV0AqbT3BlbkFJB0C1XosY9zG24dgGZQvg'; // Ihr OpenAI API-Schlüssel
+  const OPENAI_API_URL = 'https://api.openai.com/v1/engines/davinci-codex/completions';
+
   let scene, camera, renderer, controls;
   let axesScene, axesCamera, axesRenderer, axesHelper;
   let viewDistance = 175;
@@ -213,9 +217,46 @@
   });
 
   // Event handler for clicking on a star
-  function onStarClick(event, star) {
-    if (star.userData.wikiUrl) {
-      window.open(star.userData.wikiUrl, '_blank');
+  async function onStarClick(event, star) {
+    if (star.userData && star.userData.wikiUrl) {
+      try {
+        const summary = await fetchWikiSummary(star.userData.wikiUrl);
+        if (summary) {
+          alert(summary);
+        } else {
+          alert('No summary available.');
+        }
+      } catch (error) {
+        console.error('Error fetching wiki summary:', error);
+        alert('Failed to fetch wiki summary.');
+      }
+    }
+  }
+
+  // Function to fetch Wikipedia summary using OpenAI API
+  async function fetchWikiSummary(url) {
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        prompt: `Summarize the Wikipedia page at ${url}`,
+        max_tokens: 150
+      })
+    };
+
+    try {
+      const response = await fetch(OPENAI_API_URL, requestOptions);
+      const data = await response.json();
+      if (data && data.choices && data.choices.length > 0) {
+        return data.choices[0].text.trim();
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching wiki summary from OpenAI:', error);
+      throw error;
     }
   }
 </script>
