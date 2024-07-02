@@ -147,6 +147,8 @@
     }
   }
 
+  
+
   function resetCameraPosition() {
     const duration = 1000;
     const startPosition = camera.position.clone();
@@ -177,29 +179,30 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  function onMouseClick(event) {
+  let selectedStar;
+  async function onMouseClick(event) {
+    // const sce = scene.children.reverse();
+    // const sun = sce.find((child) => {
+    //   console.log(child)
+    // });
+    console.log("click")
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
-    const meshObjects = [];
-    scene.traverse(function (object) {
-      if (object instanceof THREE.Mesh) {
-        meshObjects.push(object);
-      }
-    });
-    let selectedStar
-    const intersects = raycaster.intersectObjects(meshObjects);
+    const intersects = raycaster.intersectObjects(scene.children, true);
     if (intersects.length > 0) {
       let firstObject = intersects[0].object;
-      if (firstObject.userData.starData) {
-        selectedStar = {
-          ...firstObject.userData.starData,
-          object: firstObject,
+      console.log(firstObject)
+      if (firstObject.userData.wikiUrl) {
+        const result = await axios.post("https://newstar-api.maximebeck.de/api/wiki-summary", {
+          wikiUrl: firstObject.userData.wikiUrl
+        })
+        console.log(result.data);
         };
-        console.log(selectedStar);
+
       }
     }
-  }
+  
   window.addEventListener("click", onMouseClick);
 </script>
 
