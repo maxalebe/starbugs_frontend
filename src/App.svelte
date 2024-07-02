@@ -149,6 +149,30 @@
     }
   }
 
+  function resetCameraPosition() {
+    const duration = 1000;
+    const startPosition = camera.position.clone();
+    const startTarget = controls.target.clone();
+    const endPosition = new THREE.Vector3(0, 20, 100);
+    const endTarget = new THREE.Vector3(0, 0, 0);
+
+    const startTime = performance.now();
+
+    function animateReset() {
+      const elapsedTime = performance.now() - startTime;
+      const t = Math.min(elapsedTime / duration, 1);
+      camera.position.lerpVectors(startPosition, endPosition, t);
+      controls.target.lerpVectors(startTarget, endTarget, t);
+      controls.update();
+
+      if (t < 1) {
+        requestAnimationFrame(animateReset);
+      }
+    }
+
+    animateReset();
+  }
+
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
