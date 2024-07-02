@@ -93,37 +93,7 @@
 
       stars.forEach((star) => {
         const geometry = new THREE.SphereGeometry(0.2, 16, 16);
-        const material = new THREE.ShaderMaterial({
-          uniforms: {
-            time: { value: Math.random() * 1000 },
-            hover: { value: false }
-          },
-          vertexShader: `
-            varying vec3 vNormal;
-            void main() {
-              vNormal = normalize(normalMatrix * normal);
-              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-          `,
-          fragmentShader: `
-            uniform float time;
-            uniform bool hover;
-            varying vec3 vNormal;
-            void main() {
-              float intensity = sin(time + length(vNormal) * 10.0) * 0.5 + 0.5;
-              vec3 color = vec3(intensity);
-              if (hover) {
-                color = vec3(1.0, 1.0, 0.0);
-              } else if (${star.id == 1}) {
-                color = vec3(1.0, 1.0, 0.0);
-              } else if (${star.wikiUrl ? 'true' : 'false'}) {
-                color = vec3(0.0, 0.0, 1.0);
-              }
-              gl_FragColor = vec4(color, 1.0);
-            }
-          `,
-          transparent: true
-        });
+        const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
         const starMesh = new THREE.Mesh(geometry, material);
         starMesh.position.set(star.x0, star.y0, star.z0);
         starMesh.userData = { wikiUrl: star.wikiUrl };
@@ -145,14 +115,12 @@
     const intersects = raycaster.intersectObjects(starMeshes);
 
     starMeshes.forEach(starMesh => {
-      starMesh.material.uniforms.hover.value = false;
+      starMesh.material.color.set(0xffffff);
     });
 
     if (intersects.length > 0) {
       const intersectedStar = intersects[0].object;
-      if (intersectedStar.userData.wikiUrl) {
-        intersectedStar.material.uniforms.hover.value = true;
-      }
+      intersectedStar.material.color.set(0xff0000); // Highlight the star when hovered
     }
   }
 
@@ -165,16 +133,12 @@
   function animate() {
     requestAnimationFrame(animate);
     controls.update();
-    starMeshes.forEach(starMesh => {
-      starMesh.material.uniforms.time.value += 0.02;
-    });
     renderer.render(scene, camera);
     axesRenderer.render(axesScene, axesCamera);
   }
 
   function updateViewDistance(event) {
     viewDistance = event.target.value;
-    console.log("Updating view distance to:", viewDistance);
     camera.far = Math.min(Number(viewDistance), 350);
     camera.updateProjectionMatrix();
     if (viewDistance > 0) {
@@ -183,30 +147,6 @@
       scene.children = scene.children.filter(child => !(child instanceof THREE.Mesh));
       scene.add(ringMesh);
     }
-  }
-
-  function resetCameraPosition() {
-    const duration = 1000;
-    const startPosition = camera.position.clone();
-    const startTarget = controls.target.clone();
-    const endPosition = new THREE.Vector3(0, 20, 100);
-    const endTarget = new THREE.Vector3(0, 0, 0);
-
-    const startTime = performance.now();
-
-    function animateReset() {
-      const elapsedTime = performance.now() - startTime;
-      const t = Math.min(elapsedTime / duration, 1);
-      camera.position.lerpVectors(startPosition, endPosition, t);
-      controls.target.lerpVectors(startTarget, endTarget, t);
-      controls.update();
-
-      if (t < 1) {
-        requestAnimationFrame(animateReset);
-      }
-    }
-
-    animateReset();
   }
 
   window.addEventListener('resize', () => {
@@ -221,7 +161,7 @@
       try {
         const summary = await fetchWikiSummary(star.userData.wikiUrl);
         if (summary) {
-          alert(summary);
+          alert(summary); // Zeigt die Zusammenfassung im Alert-Fenster an
         } else {
           alert('No summary available.');
         }
@@ -242,7 +182,8 @@
       },
       body: JSON.stringify({
         prompt: `Summarize the Wikipedia page at ${url}`,
-        max_tokens: 150
+        max_tokens: 50, // Anpassung der max_tokens auf 50 für eine kurze Zusammenfassung
+        temperature: 0.3 // Anpassung der Temperatur für konsistente Ergebnisse
       })
     };
 
