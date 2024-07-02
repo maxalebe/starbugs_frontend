@@ -49,6 +49,9 @@
     scene.add(ringMesh);
 
     showStars();
+
+    // Add mouse move listener for hovering over stars
+    window.addEventListener('mousemove', onMouseMove, false);
   }
 
   function onAxesMouseDown(event) {
@@ -82,7 +85,8 @@
         const geometry = new THREE.SphereGeometry(0.2, 16, 16);
         const material = new THREE.ShaderMaterial({
           uniforms: {
-            time: { value: Math.random() * 1000 }
+            time: { value: Math.random() * 1000 },
+            hover: { value: false }
           },
           vertexShader: `
             varying vec3 vNormal;
@@ -93,11 +97,16 @@
           `,
           fragmentShader: `
             uniform float time;
+            uniform bool hover;
             varying vec3 vNormal;
             void main() {
               float intensity = sin(time + length(vNormal) * 10.0) * 0.5 + 0.5;
               vec3 color = vec3(intensity);
-              ${star.wikiUrl ? 'color = vec3(0.0, 0.0, 1.0);' : ''}
+              if (hover) {
+                color = vec3(1.0, 1.0, 0.0);
+              } else if (${star.wikiUrl ? 'true' : 'false'}) {
+                color = vec3(0.0, 0.0, 1.0);
+              }
               gl_FragColor = vec4(color, 1.0);
             }
           `,
@@ -105,11 +114,33 @@
         });
         const starMesh = new THREE.Mesh(geometry, material);
         starMesh.position.set(star.x0, star.y0, star.z0);
+        starMesh.userData = { wikiUrl: star.wikiUrl };
         scene.add(starMesh);
         starMeshes.push(starMesh);
       });
     } catch (error) {
       console.error('Error fetching star data:', error);
+    }
+  }
+
+  function onMouseMove(event) {
+    const mouse = new THREE.Vector2(
+      (event.clientX / window.innerWidth) * 2 - 1,
+      -(event.clientY / window.innerHeight) * 2 + 1
+    );
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(starMeshes);
+
+    starMeshes.forEach(starMesh => {
+      starMesh.material.uniforms.hover.value = false;
+    });
+
+    if (intersects.length > 0) {
+      const intersectedStar = intersects[0].object;
+      if (intersectedStar.userData.wikiUrl) {
+        intersectedStar.material.uniforms.hover.value = true;
+      }
     }
   }
 
