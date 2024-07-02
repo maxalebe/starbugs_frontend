@@ -72,7 +72,7 @@
 
   async function showStars() {
     try {
-      const response = await axios.get('http://localhost:3000/star-data');
+      const response = await axios.get('https://newstar-api.maximebeck.de/star-data');
       const stars = response.data;
 
       scene.children = scene.children.filter(child => !(child instanceof THREE.Mesh) || child === ringMesh);
