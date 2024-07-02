@@ -111,6 +111,8 @@
               vec3 color = vec3(intensity);
               if (hover) {
                 color = vec3(1.0, 1.0, 0.0);
+              } else if (${star.id == 1}) {
+                color = vec3(1.0, 1.0, 0.0);
               } else if (${star.wikiUrl ? 'true' : 'false'}) {
                 color = vec3(0.0, 0.0, 1.0);
               }
@@ -121,9 +123,9 @@
         });
         const starMesh = new THREE.Mesh(geometry, material);
         starMesh.position.set(star.x0, star.y0, star.z0);
-        starMesh.userData = { wikiUrl: star.wikiUrl, coordinates: { x: star.x0, y: star.y0, z: star.z0 } };
-        scene.add(starMesh);
+        starMesh.userData = { wikiUrl: star.wikiUrl };
         starMeshes.push(starMesh);
+        scene.add(starMesh);
       });
     } catch (error) {
       console.error('Error fetching star data:', error);
@@ -147,8 +149,6 @@
       const intersectedStar = intersects[0].object;
       if (intersectedStar.userData.wikiUrl) {
         intersectedStar.material.uniforms.hover.value = true;
-        const coordinates = intersectedStar.userData.coordinates;
-        console.log(`Coordinates of star: x=${coordinates.x.toFixed(2)}, y=${coordinates.y.toFixed(2)}, z=${coordinates.z.toFixed(2)}`);
       }
     }
   }
@@ -211,6 +211,13 @@
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
+
+  // Event handler for clicking on a star
+  function onStarClick(event, star) {
+    if (star.userData.wikiUrl) {
+      window.open(star.userData.wikiUrl, '_blank');
+    }
+  }
 </script>
 
 <main>
@@ -255,3 +262,7 @@
     background-color: #0056b3;
   }
 </style>
+
+{#each starMeshes as star}
+  <div on:click={(e) => onStarClick(e, star)}></div>
+{/each}
