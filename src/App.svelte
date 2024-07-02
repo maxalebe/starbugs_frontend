@@ -4,6 +4,9 @@
   import * as THREE from 'three';
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
+  let mouse = new THREE.Vector2()
+  let raycaster = new THREE.Raycaster() 
+
   let scene, camera, renderer, controls;
   let axesScene, axesCamera, axesRenderer, axesHelper;
   let viewDistance = 175;
@@ -174,20 +177,30 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  async function onStarClick(event, star) {
-    if (star.userData && star.userData.wikiUrl) {
-      try {
-        const response = await axios.post('http://localhost:3000/api/wiki-summary', {
-          wikiUrl: star.userData.wikiUrl
-        });
-        const summary = response.data.text; // Hier die Antwort überprüfen
-        console.log(`Summary for ${star.userData.wikiUrl}: ${summary}`);
-      } catch (error) {
-        console.error('Error fetching wiki summary:', error);
-        console.log('Failed to fetch wiki summary.');
+  function onMouseClick(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const meshObjects = [];
+    scene.traverse(function (object) {
+      if (object instanceof THREE.Mesh) {
+        meshObjects.push(object);
+      }
+    });
+    let selectedStar
+    const intersects = raycaster.intersectObjects(meshObjects);
+    if (intersects.length > 0) {
+      let firstObject = intersects[0].object;
+      if (firstObject.userData.starData) {
+        selectedStar = {
+          ...firstObject.userData.starData,
+          object: firstObject,
+        };
+        console.log(selectedStar);
       }
     }
   }
+  window.addEventListener("click", onMouseClick);
 </script>
 
 <main>
