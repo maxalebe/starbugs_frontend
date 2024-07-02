@@ -5,7 +5,6 @@
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
   // OpenAI API Konfiguration
-  const OPENAI_API_KEY = 'sk-proj-8S3kEKIkANXEpzUV0AqbT3BlbkFJB0C1XosY9zG24dgGZQvg'; // Ihr OpenAI API-Schlüssel
   const OPENAI_API_URL = 'https://api.openai.com/v1/engines/davinci-codex/completions';
 
   let scene, camera, renderer, controls;
