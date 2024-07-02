@@ -4,9 +4,6 @@
   import * as THREE from 'three';
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-  // OpenAI API Konfiguration
-  const OPENAI_API_URL = 'https://api.openai.com/v1/engines/davinci-codex/completions';
-
   let scene, camera, renderer, controls;
   let axesScene, axesCamera, axesRenderer, axesHelper;
   let viewDistance = 175;
@@ -51,8 +48,7 @@
     ringMesh.rotation.x = Math.PI / 2;
     scene.add(ringMesh);
 
-    // Add yellow circle
-    const circleGeometry = new THREE.CircleGeometry(0.2 * 4, 32); // Four times the radius of a star
+    const circleGeometry = new THREE.CircleGeometry(0.2 * 4, 32);
     const circleMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
     const circleMesh = new THREE.Mesh(circleGeometry, circleMaterial);
     circleMesh.position.set(0, 0, 0);
@@ -60,7 +56,6 @@
 
     showStars();
 
-    // Add mouse move listener for hovering over stars
     window.addEventListener('mousemove', onMouseMove, false);
   }
 
@@ -120,7 +115,7 @@
 
     if (intersects.length > 0) {
       const intersectedStar = intersects[0].object;
-      intersectedStar.material.color.set(0xff0000); // Highlight the star when hovered
+      intersectedStar.material.color.set(0xff0000);
     }
   }
 
@@ -179,48 +174,18 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  // Event handler for clicking on a star
   async function onStarClick(event, star) {
     if (star.userData && star.userData.wikiUrl) {
       try {
-        const summary = await fetchWikiSummary(star.userData.wikiUrl);
-        if (summary) {
-          alert(summary); // Zeigt die Zusammenfassung im Alert-Fenster an
-        } else {
-          alert('No summary available.');
-        }
+        const response = await axios.post('http://localhost:3000/api/wiki-summary', {
+          wikiUrl: star.userData.wikiUrl
+        });
+        const summary = response.data.summary;
+        console.log(`Summary for ${star.userData.wikiUrl}: ${summary}`);
       } catch (error) {
         console.error('Error fetching wiki summary:', error);
-        alert('Failed to fetch wiki summary.');
+        console.log('Failed to fetch wiki summary.');
       }
-    }
-  }
-
-  // Function to fetch Wikipedia summary using OpenAI API
-  async function fetchWikiSummary(url) {
-    const requestOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        prompt: `Summarize the Wikipedia page at ${url}`,
-        max_tokens: 50, // Anpassung der max_tokens auf 50 für eine kurze Zusammenfassung
-        temperature: 0.3 // Anpassung der Temperatur für konsistente Ergebnisse
-      })
-    };
-
-    try {
-      const response = await fetch(OPENAI_API_URL, requestOptions);
-      const data = await response.json();
-      if (data && data.choices && data.choices.length > 0) {
-        return data.choices[0].text.trim();
-      }
-      return null;
-    } catch (error) {
-      console.error('Error fetching wiki summary from OpenAI:', error);
-      throw error;
     }
   }
 </script>
