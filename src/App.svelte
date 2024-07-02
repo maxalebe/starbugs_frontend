@@ -33,21 +33,27 @@
   }
   
   async function showStars() {
-    const response = await axios.get(process.env.VITE_API_BASE_URL || 'https://newstar-api.maximebeck.de/star-data');
-    const stars = response.data;
+    try {
+      const response = await axios.get('http://localhost:3000/star-data');
+      const stars = response.data;
 
-    // Clear existing stars from the scene
-    scene.children = scene.children.filter(child => !(child instanceof THREE.Mesh));
+      // Clear existing stars from the scene
+      scene.children = scene.children.filter(child => !(child instanceof THREE.Mesh));
 
-    if (viewDistance <= 0 || stars.length < 1) return; // Early exit if view distance is zero or no stars found
+      if (viewDistance <= 0 || stars.length < 1) return; // Early exit if view distance is zero or no stars found
 
-    stars.forEach((star) => {
-      const geometry = new THREE.SphereGeometry(0.2, 16, 16);
-      const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const starMesh = new THREE.Mesh(geometry, material);
-      starMesh.position.set(star.x0, star.y0, star.z0);
-      scene.add(starMesh);
-    });
+      stars.forEach((star) => {
+        if (star.wikiUrl) {
+          const geometry = new THREE.SphereGeometry(0.2, 16, 16);
+          const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+          const starMesh = new THREE.Mesh(geometry, material);
+          starMesh.position.set(star.x0, star.y0, star.z0);
+          scene.add(starMesh);
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching star data:', error);
+    }
   }
 
   onMount(async () => {
