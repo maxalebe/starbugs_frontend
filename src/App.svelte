@@ -49,7 +49,7 @@
     scene.add(ringMesh);
 
     // Add yellow circle
-    const circleGeometry = new THREE.CircleGeometry(0.8, 32); // 4 times the radius of a star (0.2 * 4)
+    const circleGeometry = new THREE.CircleGeometry(10, 32); // 4 times the radius of a star (0.2 * 4)
     const circleMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
     const circleMesh = new THREE.Mesh(circleGeometry, circleMaterial);
     circleMesh.position.set(0, 0, 0);
