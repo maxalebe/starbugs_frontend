@@ -9,7 +9,6 @@
   let viewDistance = 175;
   let ringMesh;
   let starMeshes = [];
-  let starsWithWikiUrl = [];
 
   function init() {
     scene = new THREE.Scene();
@@ -26,7 +25,6 @@
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableZoom = true;
     controls.enablePan = true;
-    controls.enableDamping = true;
     controls.dampingFactor = 0.05;
 
     axesScene = new THREE.Scene();
@@ -77,7 +75,6 @@
 
       scene.children = scene.children.filter(child => !(child instanceof THREE.Mesh) || child === ringMesh);
       starMeshes = [];
-      starsWithWikiUrl = [];
 
       if (viewDistance <= 0 || stars.length < 1) return;
 
@@ -110,10 +107,6 @@
         starMesh.position.set(star.x0, star.y0, star.z0);
         scene.add(starMesh);
         starMeshes.push(starMesh);
-
-        if (star.wikiUrl) {
-          starsWithWikiUrl.push(star);
-        }
       });
     } catch (error) {
       console.error('Error fetching star data:', error);
@@ -185,15 +178,6 @@
   <input type="range" id="viewDistance" min="20" max="350" value="175" on:input={updateViewDistance} />
   <input type="number" id="viewDistanceInput" min="20" max="350" value="175" on:input={updateViewDistance} style="width: 60px; margin-left: 10px;">
   <button on:click={resetCameraPosition} style="margin-left: 10px;">Reset Camera</button>
-
-  <div class="star-list">
-    <h3>Stars with Wiki URLs:</h3>
-    <ul>
-      {#each starsWithWikiUrl as star}
-        <li>{star.proper}</li>
-      {/each}
-    </ul>
-  </div>
 </main>
 
 <style>
@@ -216,17 +200,6 @@
     border-radius: 5px;
     display: flex;
     align-items: center;
-  }
-
-  .star-list {
-    position: absolute;
-    top: 50px;
-    left: 10px;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 10px;
-    border-radius: 5px;
-    max-height: 200px;
-    overflow-y: auto;
   }
 
   button {
