@@ -180,7 +180,7 @@
         const response = await axios.post('http://localhost:3000/api/wiki-summary', {
           wikiUrl: star.userData.wikiUrl
         });
-        const summary = response.data.summary;
+        const summary = response.data.text; // Hier die Antwort überprüfen
         console.log(`Summary for ${star.userData.wikiUrl}: ${summary}`);
       } catch (error) {
         console.error('Error fetching wiki summary:', error);
