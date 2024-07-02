@@ -121,7 +121,7 @@
         });
         const starMesh = new THREE.Mesh(geometry, material);
         starMesh.position.set(star.x0, star.y0, star.z0);
-        starMesh.userData = { wikiUrl: star.wikiUrl };
+        starMesh.userData = { wikiUrl: star.wikiUrl, coordinates: { x: star.x0, y: star.y0, z: star.z0 } };
         scene.add(starMesh);
         starMeshes.push(starMesh);
       });
@@ -147,6 +147,8 @@
       const intersectedStar = intersects[0].object;
       if (intersectedStar.userData.wikiUrl) {
         intersectedStar.material.uniforms.hover.value = true;
+        const coordinates = intersectedStar.userData.coordinates;
+        console.log(`Coordinates of star: x=${coordinates.x.toFixed(2)}, y=${coordinates.y.toFixed(2)}, z=${coordinates.z.toFixed(2)}`);
       }
     }
   }
