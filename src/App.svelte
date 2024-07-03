@@ -113,9 +113,9 @@
               vec3 color = vec3(intensity);
               ${star.wikiUrl ? 'color = vec3(0.0, 0.0, 1.0);' : ''}
               if (hover) {
-                color = vec3(1.0, 1.0, 0.0);
-              } else if (${star.wikiUrl ? 'true' : 'false'}) {
                 color = vec3(0.0, 0.0, 1.0);
+              } else if (${star.wikiUrl ? 'true' : 'false'}) {
+                color = vec3(1.0, 1.0, 0.0);
               }
               gl_FragColor = vec4(color, 1.0);
             }
@@ -296,3 +296,4 @@
 {#each starMeshes as star}
   <div on:click={(e) => onStarClick(e, star)}></div>
 {/each}
+
