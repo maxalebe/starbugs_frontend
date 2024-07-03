@@ -234,13 +234,14 @@
   <button on:click={resetCameraPosition} style="margin-left: 10px;">Reset Camera</button>
 </main>
 
-<div class="summary-container">
+<div class="summary-container" style="position: absolute; top: 60px; left: 10px;">
   {#if summary}
     <div class="summary-window">
       <p>{summary}</p>
     </div>
   {/if}
 </div>
+
 
 <style>
   * {
@@ -257,7 +258,7 @@
     position: absolute;
     top: 10px;
     left: 10px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgb(255, 255, 255);
     padding: 10px;
     border-radius: 5px;
     display: flex;
@@ -280,15 +281,15 @@
   .summary-container {
     position: absolute;
     top: 10px;
-    right: 10px;
+    left: 10px;
   }
 
   .summary-window {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgb(255, 255, 255);
     padding: 10px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 300px;
+    max-width: 437px;
   }
 </style>
 
