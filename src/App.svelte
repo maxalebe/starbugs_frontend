@@ -4,14 +4,15 @@
   import * as THREE from 'three';
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-  let mouse = new THREE.Vector2()
-  let raycaster = new THREE.Raycaster() 
+  let mouse = new THREE.Vector2();
+  let raycaster = new THREE.Raycaster();
 
   let scene, camera, renderer, controls;
   let axesScene, axesCamera, axesRenderer, axesHelper;
   let viewDistance = 175;
   let ringMesh;
   let starMeshes = [];
+  let summary = ""; // Variable zur Speicherung der Zusammenfassung
 
   function init() {
     scene = new THREE.Scene();
@@ -142,12 +143,12 @@
     const intersects = raycaster.intersectObjects(starMeshes);
 
     starMeshes.forEach(starMesh => {
-      starMesh.material.color.set(0xffffff);
+      starMesh.material.uniforms.hover.value = false; // Setze alle auf nicht gehovert
     });
 
     if (intersects.length > 0) {
       const intersectedStar = intersects[0].object;
-      intersectedStar.material.color.set(0xff0000);
+      intersectedStar.material.uniforms.hover.value = true; // Setze den gehoverten Stern auf true
     }
   }
 
@@ -175,8 +176,6 @@
       scene.add(ringMesh);
     }
   }
-
-  
 
   function resetCameraPosition() {
     const duration = 1000;
@@ -210,27 +209,20 @@
 
   let selectedStar;
   async function onMouseClick(event) {
-    // const sce = scene.children.reverse();
-    // const sun = sce.find((child) => {
-    //   console.log(child)
-    // });
-    console.log("click")
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(scene.children, true);
     if (intersects.length > 0) {
       let firstObject = intersects[0].object;
-      console.log(firstObject)
       if (firstObject.userData.wikiUrl) {
         const result = await axios.post("https://newstar-api.maximebeck.de/api/wiki-summary", {
           wikiUrl: firstObject.userData.wikiUrl
-        })
-        console.log(result.data.summary);
-        };
-
+        });
+        summary = result.data.summary; // Speichere die Zusammenfassung
       }
     }
+  }
   
   window.addEventListener("click", onMouseClick);
 </script>
@@ -241,6 +233,14 @@
   <input type="number" id="viewDistanceInput" min="20" max="350" value="175" on:input={updateViewDistance} style="width: 60px; margin-left: 10px;">
   <button on:click={resetCameraPosition} style="margin-left: 10px;">Reset Camera</button>
 </main>
+
+<div class="summary-container">
+  {#if summary}
+    <div class="summary-window">
+      <p>{summary}</p>
+    </div>
+  {/if}
+</div>
 
 <style>
   * {
@@ -275,6 +275,20 @@
 
   button:hover {
     background-color: #0056b3;
+  }
+
+  .summary-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+  .summary-window {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 300px;
   }
 </style>
 
